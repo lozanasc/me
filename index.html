@@ -356,7 +356,7 @@
                 async fetchPosts() {
                     try {
                         // Replace this URL with your actual S3 JSON file URL
-                        const response = await fetch('YOUR_S3_JSON_URL')
+                        const response = await fetch('https://devzana-blogs.s3.us-east-1.amazonaws.com/blog-posts.json')
                         const data = await response.json()
                         this.posts = data.posts
                         this.loading = false
