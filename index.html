@@ -76,183 +76,311 @@
     <div class="min-h-screen p-8">
         <div class="max-w-4xl mx-auto relative">
             <div class="glass-effect rounded-lg p-8 shadow-xl">
-            <!-- Header Section -->
-            <header class="mb-12">
-                <h1 class="text-4xl font-bold mb-2">Sean Christian Lozana</h1>
-                <p class="text-blue-400 mb-4">Full-stack Engineer</p>
-                <div class="flex flex-wrap gap-4 text-gray-400">
-                    <a href="mailto:lozanascbusiness@gmail.com" class="hover:text-blue-400 transition-colors">
-                        lozanascbusiness@gmail.com
-                    </a>
-                    <a href="tel:+639455477432" class="hover:text-blue-400 transition-colors">
-                        +639455477432
-                    </a>
-                    <a href="https://linkedin.com/in/devzana" class="hover:text-blue-400 transition-colors" target="_blank">
-                        linkedin.com/in/devzana
-                    </a>
-                </div>
-            </header>
+                <!-- Header Section -->
+                <header class="mb-12">
+                    <h1 class="text-4xl font-bold mb-2">Sean Christian Lozana</h1>
+                    <p class="text-blue-400 mb-4">Full-stack Engineer</p>
+                    <div class="flex flex-wrap gap-4 text-gray-400">
+                        <a href="mailto:lozanascbusiness@gmail.com" class="hover:text-blue-400 transition-colors">
+                            lozanascbusiness@gmail.com
+                        </a>
+                        <a href="tel:+639455477432" class="hover:text-blue-400 transition-colors">
+                            +639455477432
+                        </a>
+                        <a href="https://linkedin.com/in/devzana" class="hover:text-blue-400 transition-colors" target="_blank">
+                            linkedin.com/in/devzana
+                        </a>
+                    </div>
+                </header>
 
-            <!-- About Section -->
-            <section class="mb-12">
-                <p class="text-gray-300 text-lg leading-relaxed">
-                    I'm a developer passionate about crafting accessible, user-perfect digital experiences. My favorite work lies at the intersection of design and development, creating experiences that not only look great but are meticulously built for performance and usability.
-                </p>
-            </section>
+                <!-- About Section -->
+                <section class="mb-12">
+                    <p class="text-gray-300 text-lg leading-relaxed">
+                        I'm a developer passionate about crafting accessible, user-perfect digital experiences. My favorite work lies at the intersection of design and development, creating experiences that not only look great but are meticulously built for performance and usability.
+                    </p>
+                </section>
 
-            <!-- Education Section -->
-            <section class="mb-12">
-                <h2 class="text-2xl font-bold mb-6 text-blue-400">Education</h2>
-                <div class="border-l-2 border-blue-500 pl-4">
-                    <h3 class="font-bold text-xl">Bachelor of Science in Computer Science</h3>
-                    <p class="text-blue-400 mb-2">Negros Oriental State University • Dumaguete City, Negros Oriental</p>
-                    <p class="text-gray-300">Graduated July 2022</p>
-                </div>
-            </section>
+                <!-- Blog Section -->
+                <section class="mb-12">
+                    <h2 class="text-2xl font-bold mb-6 text-blue-400">Blog Posts</h2>
+                    <div id="blog-app">
+                        <!-- Loading State -->
+                        <div v-if="loading" class="flex items-center justify-center p-8">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+                        </div>
 
-            <!-- Experience Section -->
-            <section class="mb-12">
-                <h2 class="text-2xl font-bold mb-6 text-blue-400">Experience</h2>
-                
-                <div class="space-y-8">
+                        <!-- Error State -->
+                        <div v-if="error" class="text-red-400 p-4 rounded-lg bg-red-900/20">
+                            {{ error }}
+                        </div>
+
+                        <!-- Blog Posts Grid -->
+                        <div v-if="!loading && !error" class="grid gap-6">
+                            <article 
+                                v-for="post in posts" 
+                                :key="post.id"
+                                class="p-6 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors"
+                            >
+                                <div class="flex flex-col space-y-4">
+                                    <!-- Post Header -->
+                                    <div class="flex flex-col space-y-2">
+                                        <h3 class="font-bold text-xl hover:text-blue-400 transition-colors">
+                                            <a 
+                                                href="#" 
+                                                @click.prevent="showPost(post)"
+                                                class="hover:text-blue-400"
+                                            >
+                                                {{ post.title }}
+                                            </a>
+                                        </h3>
+                                        <div class="flex items-center space-x-4 text-sm text-gray-400">
+                                            <span>{{ formatDate(post.publishedAt) }}</span>
+                                            <span>•</span>
+                                            <span>{{ post.readingTime }}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Post Content -->
+                                    <p class="text-gray-300">{{ post.excerpt }}</p>
+                                    
+                                    <!-- Post Tags -->
+                                    <div class="flex flex-wrap gap-2">
+                                        <span 
+                                            v-for="tag in post.tags" 
+                                            :key="tag"
+                                            class="px-3 py-1 bg-blue-900/30 rounded-full text-sm"
+                                        >
+                                            {{ tag }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+
+                        <!-- Post Modal -->
+                        <div 
+                            v-if="selectedPost"
+                            class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+                            @click.self="selectedPost = null"
+                        >
+                            <div class="bg-slate-900 rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                                <div class="flex justify-between items-start mb-4">
+                                    <h2 class="text-2xl font-bold">{{ selectedPost.title }}</h2>
+                                    <button 
+                                        @click="selectedPost = null"
+                                        class="text-gray-400 hover:text-white"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                <div class="prose prose-invert max-w-none">
+                                    {{ selectedPost.content }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Education Section -->
+                <section class="mb-12">
+                    <h2 class="text-2xl font-bold mb-6 text-blue-400">Education</h2>
                     <div class="border-l-2 border-blue-500 pl-4">
-                        <h3 class="font-bold text-xl">Full-stack Engineer</h3>
-                        <p class="text-blue-400 mb-2">Freelance • Remote • January 2024 - Present</p>
-                        <ul class="space-y-2 text-gray-300">
-                            <li>• Spearheaded the development of an All-in-one property management tool and unifying multiple OTA platforms like Airbnb and Booking.com, enabling social media integration for streamlined content management and communication.</li>
-                            <li>• Developed features for a predictive options trading app using Next.js and Python, integrating third-party APIs to enhance app functionality.</li>
-                            <li>• Utilized Cypress and Sentry for test automation, error tracking, and performance monitoring.</li>
-                        </ul>
+                        <h3 class="font-bold text-xl">Bachelor of Science in Computer Science</h3>
+                        <p class="text-blue-400 mb-2">Negros Oriental State University • Dumaguete City, Negros Oriental</p>
+                        <p class="text-gray-300">Graduated July 2022</p>
                     </div>
+                </section>
 
-                    <div class="border-l-2 border-blue-500 pl-4">
-                        <h3 class="font-bold text-xl">Software Engineer (Full-stack Engineer)</h3>
-                        <p class="text-blue-400 mb-2">Stratpoint Technologies • Hybrid • August 2022 - January 2024</p>
-                        <ul class="space-y-2 text-gray-300">
-                            <li>• Developed features for an internal HRIS portal using NodeJS and ReactJS</li>
-                            <li>• Created an event/office booking management app using Flutter, NextJS, Strapi, and Supabase</li>
-                            <li>• Collaborated daily with diverse teams consisting of engineers, designers, product owners, and clients</li>
-                        </ul>
-                    </div>
+                <!-- Experience Section -->
+                <section class="mb-12">
+                    <h2 class="text-2xl font-bold mb-6 text-blue-400">Experience</h2>
+                    <div class="space-y-8">
+                        <div class="border-l-2 border-blue-500 pl-4">
+                            <h3 class="font-bold text-xl">Full-stack Engineer</h3>
+                            <p class="text-blue-400 mb-2">Freelance • Remote • January 2024 - Present</p>
+                            <ul class="space-y-2 text-gray-300">
+                                <li>• Spearheaded the development of an All-in-one property management tool and unifying multiple OTA platforms like Airbnb and Booking.com, enabling social media integration for streamlined content management and communication.</li>
+                                <li>• Developed features for a predictive options trading app using Next.js and Python, integrating third-party APIs to enhance app functionality.</li>
+                                <li>• Utilized Cypress and Sentry for test automation, error tracking, and performance monitoring.</li>
+                            </ul>
+                        </div>
 
-                    <div class="border-l-2 border-blue-500 pl-4">
-                        <h3 class="font-bold text-xl">React Native Developer Intern</h3>
-                        <p class="text-blue-400 mb-2">Bluebeans Systems • On-site • March 2022 - June 2022</p>
-                        <ul class="space-y-2 text-gray-300">
-                            <li>• Spearheaded the development of an e-Wallet Mobile Application using React Native</li>
-                            <li>• Implemented screens and components according to design specifications</li>
-                            <li>• Collaborated with the back-end team to integrate APIs</li>
-                        </ul>
-                    </div>
+                        <div class="border-l-2 border-blue-500 pl-4">
+                            <h3 class="font-bold text-xl">Software Engineer (Full-stack Engineer)</h3>
+                            <p class="text-blue-400 mb-2">Stratpoint Technologies • Hybrid • August 2022 - January 2024</p>
+                            <ul class="space-y-2 text-gray-300">
+                                <li>• Developed features for an internal HRIS portal using NodeJS and ReactJS</li>
+                                <li>• Created an event/office booking management app using Flutter, NextJS, Strapi, and Supabase</li>
+                                <li>• Collaborated daily with diverse teams consisting of engineers, designers, product owners, and clients</li>
+                            </ul>
+                        </div>
 
-                    <div class="border-l-2 border-blue-500 pl-4">
-                        <h3 class="font-bold text-xl">NextJS Developer Intern</h3>
-                        <p class="text-blue-400 mb-2">NEXPLAY Technologies • Remote • October 2021 - February 2022</p>
-                        <ul class="space-y-2 text-gray-300">
-                            <li>• Collaborated with the design and back-end team to upgrade their Internal Admin Dashboard</li>
-                            <li>• Implemented pages and components according to design specification</li>
-                            <li>• Learned and explored new front-end technologies</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
+                        <div class="border-l-2 border-blue-500 pl-4">
+                            <h3 class="font-bold text-xl">React Native Developer Intern</h3>
+                            <p class="text-blue-400 mb-2">Bluebeans Systems • On-site • March 2022 - June 2022</p>
+                            <ul class="space-y-2 text-gray-300">
+                                <li>• Spearheaded the development of an e-Wallet Mobile Application using React Native</li>
+                                <li>• Implemented screens and components according to design specifications</li>
+                                <li>• Collaborated with the back-end team to integrate APIs</li>
+                            </ul>
+                        </div>
 
-            <!-- Featured Projects Section -->
-            <section class="mb-12">
-                <h2 class="text-2xl font-bold mb-6 text-blue-400">Featured Projects</h2>
-                <div class="grid gap-6">
-                    <div class="p-6 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors">
-                        <h3 class="font-bold text-xl mb-2">e-Wallet App</h3>
-                        <p class="text-gray-300 mb-4">A mobile application that allows users to conduct their financial transactions through the e-Wallet application</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">React Native</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">API Integration</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Mobile Development</span>
+                        <div class="border-l-2 border-blue-500 pl-4">
+                            <h3 class="font-bold text-xl">NextJS Developer Intern</h3>
+                            <p class="text-blue-400 mb-2">NEXPLAY Technologies • Remote • October 2021 - February 2022</p>
+                            <ul class="space-y-2 text-gray-300">
+                                <li>• Collaborated with the design and back-end team to upgrade their Internal Admin Dashboard</li>
+                                <li>• Implemented pages and components according to design specification</li>
+                                <li>• Learned and explored new front-end technologies</li>
+                            </ul>
                         </div>
                     </div>
+                </section>
 
-                    <div class="p-6 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors">
-                        <h3 class="font-bold text-xl mb-2">Engage App</h3>
-                        <p class="text-gray-300 mb-4">A web and mobile application that aids churches in organizing, managing, and automating their daily operations.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Java</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">NodeJS</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Express</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">React</span>
+                <!-- Featured Projects Section -->
+                <section class="mb-12">
+                    <h2 class="text-2xl font-bold mb-6 text-blue-400">Featured Projects</h2>
+                    <div class="grid gap-6">
+                        <div class="p-6 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors">
+                            <h3 class="font-bold text-xl mb-2">e-Wallet App</h3>
+                            <p class="text-gray-300 mb-4">A mobile application that allows users to conduct their financial transactions through the e-Wallet application</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">React Native</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">API Integration</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Mobile Development</span>
+                            </div>
                         </div>
-                        <ul class="mt-4 space-y-2 text-gray-300">
-                            <li>• Integrated YouTube and Facebook APIs for event management and media content</li>
-                            <li>• Implemented authentication and CRUD functionalities across platforms</li>
-                        </ul>
-                    </div>
 
-                    <div class="p-6 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors">
-                        <h3 class="font-bold text-xl mb-2">Property Management Tool</h3>
-                        <p class="text-gray-300 mb-4">All-in-one property management platform integrating multiple booking platforms with social media management capabilities.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Next.js</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">MongoDB</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">NestJS</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">API Integration</span>
+                        <div class="p-6 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors">
+                            <h3 class="font-bold text-xl mb-2">Engage App</h3>
+                            <p class="text-gray-300 mb-4">A web and mobile application that aids churches in organizing, managing, and automating their daily operations.</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Java</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">NodeJS</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Express</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">React</span>
+                            </div>
+                            <ul class="mt-4 space-y-2 text-gray-300">
+                                <li>• Integrated YouTube and Facebook APIs for event management and media content</li>
+                                <li>• Implemented authentication and CRUD functionalities across platforms</li>
+                            </ul>
                         </div>
-                    </div>
-                </div>
-            </section>
 
-            <!-- Skills Section -->
-            <section class="mb-12">
-                <h2 class="text-2xl font-bold mb-6 text-blue-400">Skills & Tools</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h3 class="font-bold mb-2">Languages</h3>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">JavaScript</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">TypeScript</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Java</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">PHP</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Python</span>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-bold mb-2">Applications & Tools</h3>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">VSCode</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Git</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Android Studio</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">MySQL Workbench</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">PostgreSQL</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Figma</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">JIRA</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Trello</span>
-                            <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Notion</span>
+                        <div class="p-6 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors">
+                            <h3 class="font-bold text-xl mb-2">Property Management Tool</h3>
+                            <p class="text-gray-300 mb-4">All-in-one property management platform integrating multiple booking platforms with social media management capabilities.</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Next.js</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">MongoDB</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">NestJS</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">API Integration</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <!-- Interests Section -->
-            <section class="mb-12">
-                <h2 class="text-2xl font-bold mb-6 text-blue-400">Interests</h2>
-                <div class="flex flex-wrap gap-2">
-                    <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Badminton</span>
-                    <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Music</span>
-                    <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Valorant</span>
-                    <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">CSGO</span>
-                    <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Apex Legends</span>
-                    <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Software Engineering</span>
-                    <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Competitive Programming</span>
-                </div>
-            </section>
+                <!-- Skills Section -->
+                <section class="mb-12">
+                    <h2 class="text-2xl font-bold mb-6 text-blue-400">Skills & Tools</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-bold mb-2">Languages</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">JavaScript</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">TypeScript</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Java</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">PHP</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Python</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-bold mb-2">Applications & Tools</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">VSCode</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Git</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Android Studio</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">MySQL Workbench</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">PostgreSQL</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Figma</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">JIRA</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Trello</span>
+                                <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Notion</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Interests Section -->
+                <section class="mb-12">
+                    <h2 class="text-2xl font-bold mb-6 text-blue-400">Interests</h2>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Badminton</span>
+                        <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Music</span>
+                        <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Valorant</span>
+                        <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">CSGO</span>
+                        <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Apex Legends</span>
+                        <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Software Engineering</span>
+                        <span class="px-3 py-1 bg-blue-900/30 rounded-full text-sm">Competitive Programming</span>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
 
+    <!-- Cursor Animation Script -->
     <script>
         document.addEventListener('mousemove', (e) => {
             const overlay = document.getElementById('gradient-overlay');
             overlay.style.setProperty('--x', e.clientX + 'px');
             overlay.style.setProperty('--y', e.clientY + 'px');
         });
+    </script>
+
+    <!-- Vue.js CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Blog App Script -->
+    <script>
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    posts: [],
+                    loading: true,
+                    error: null,
+                    selectedPost: null
+                }
+            },
+            methods: {
+                async fetchPosts() {
+                    try {
+                        // Replace this URL with your actual S3 JSON file URL
+                        const response = await fetch('YOUR_S3_JSON_URL')
+                        const data = await response.json()
+                        this.posts = data.posts
+                        this.loading = false
+                    } catch (err) {
+                        this.error = 'Failed to load blog posts'
+                        this.loading = false
+                        console.error('Error fetching posts:', err)
+                    }
+                },
+                formatDate(dateString) {
+                    return new Date(dateString).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    })
+                },
+                showPost(post) {
+                    this.selectedPost = post
+                }
+            },
+            mounted() {
+                this.fetchPosts()
+            }
+        }).mount('#blog-app')
     </script>
 </body>
 </html>
